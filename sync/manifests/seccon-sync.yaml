@@ -31,7 +31,7 @@ spec:
       containers:
         - name: seccon-sync
           image: seccon-sync:v1
-          args: ["http://door1-service:8888", "http://door2-service:8888"]
+          args: ["door1", "door2"]
           ports:
           - containerPort: 8080	  
    

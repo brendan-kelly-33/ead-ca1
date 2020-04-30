@@ -33,23 +33,25 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	var fetchedStrings map[string]string = make(map[string]string)
-	for i := 0; i < len(urlList); i++ {
-		log.Printf("seccon-sync[INFO]: Getting data from " + urlList[i])
-		resp, err := http.Get(urlList[i])
+	//for i := 0; i < len(urlList); i++ {
+	for _, url := range urlList {
+		log.Printf("seccon-sync[INFO]: Getting data from " + url)
+		resp, err := http.Get("http://" + url + "-sync-service:8888")
 
 		if (err != nil) {
-			log.Printf("seccon-sync[ERROR]: Couldn't get " + urlList[i] + " from site." + err.Error())
+			log.Printf("seccon-sync[ERROR]: Couldn't get " + url + " from site." + err.Error())
 		} else {
 			if resp.StatusCode == http.StatusOK {
 				bodyBytes, err2 := ioutil.ReadAll(resp.Body) 
 				if (err2 != nil) {
-					log.Printf("seccon-sync[ERROR]: Couldn't get " + urlList[i] + " from response." + err.Error())
+					log.Printf("seccon-sync[ERROR]: Couldn't get " + url + " from response." + err.Error())
 				} else {
 					return_val := string(bodyBytes)
 					return_val = strings.TrimSuffix(return_val, "\n")
 
-					fetchedStrings[urlList[i]] = return_val
-					log.Printf("seccon-sync[INFO]: Return value" + fetchedStrings[urlList[i]])
+					log.Printf("seccon-sync[INFO]: Return value" + return_val)
+
+					fetchedStrings[url] = return_val
 				}
 			} else {
 				log.Printf("seccon-sync[ERROR]: HTTP returned status " + string(resp.StatusCode))
