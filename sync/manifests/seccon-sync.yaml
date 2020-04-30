@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seccon-sync-service
+  labels:
+    app: seccon-sync
+spec:
+  ports:
+  - port: 9090
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 31080
+  selector:
+    app: seccon-sync
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seccon-sync-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seccon-sync
+  template:
+    metadata:
+      labels:
+        app: seccon-sync
+    spec:
+      containers:
+        - name: seccon-sync
+          image: seccon-sync:v1
+          args: ["http://door1-service:8888", "http://door2-service:8888"]
+          ports:
+          - containerPort: 8080	  
+   

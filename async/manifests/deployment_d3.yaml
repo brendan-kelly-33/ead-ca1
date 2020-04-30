@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: door3-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: door3
+  template:
+    metadata:
+      labels:
+        app: door3
+    spec:
+      containers:
+        - name: door3
+          args: ["3", "10", "redis-service:6379"]
+          image: door:v1
