@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: seccon
-          image: seccon:v1
+          image: eu.gcr.io/bk-eads-ca1/seccon:v1
           args: ["redis-service:6379", "2000", "50", "door1", "door2"]
           ports:
           - containerPort: 8080	  
