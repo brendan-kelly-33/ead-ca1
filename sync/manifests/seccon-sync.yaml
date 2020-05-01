@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: seccon-sync
-          image: seccon-sync:v1
+          image: eu.gcr.io/bk-eads-ca1/seccon-sync:v1
           args: ["door1", "door2"]
           ports:
           - containerPort: 8080	  

@@ -30,4 +30,4 @@ spec:
       containers:
         - name: door2sync
           args: ["2", "20"]
-          image: door-sync:v1
+          image: eu.gcr.io/bk-eads-ca1/door-sync:v1

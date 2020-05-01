@@ -9,7 +9,7 @@ spec:
   - port: 9090
     protocol: TCP
     targetPort: 8080
-    nodePort: 31080
+    nodePort: 31081
   selector:
     app: seccon
   type: NodePort
