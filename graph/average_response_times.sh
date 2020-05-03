@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "Number of runs not provided"
+  exit 1
+fi
+
 sync_endpoint=http://34.68.240.121:31080/
 async_endpoint=http://34.68.240.121:31081/
 graph_function_endpoint=https://us-central1-bk-eads-ca1.cloudfunctions.net/eades_msvcs_make_graph
@@ -23,7 +29,7 @@ echo $sync_average
 echo $async_average
 
 timestamp=$(date +%d-%m-%Y_%H-%M-%S)
-filename=barchart_$timestamp.png
+filename=response_times_$timestamp.png
 
 ylabel="Average time to execute over $1 runs (seconds)"
 

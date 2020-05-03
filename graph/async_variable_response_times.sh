@@ -1,5 +1,10 @@
 #/bin/bash
 
+if [ $# -eq 0 ]; then
+  echo "Number of runs not provided"
+  exit 1
+fi
+
 async_endpoint=http://34.68.240.121:31081/
 graph_function_endpoint=https://us-central1-bk-eads-ca1.cloudfunctions.net/eades_msvcs_make_graph
 
@@ -19,48 +24,44 @@ get_average_response () {
 # authenticate and configure kubectl to point at Kubernetes
 gcloud container clusters get-credentials bk-eads-ca --zone us-central1-c --project bk-eads-ca1
 
-# apply standard manifests and run standard test
-kubectl replace --force -f manifests/door.yaml
-kubectl replace --force -f manifests/seccon.yaml
-sleep 10
-average_time_standard=$(get_average_response $async_endpoint $num_executions)
+publishIntervals=(10 50 100 500)
+subscribeIntervals=(500 2000 10000 50000)
 
-# change door to have increased publish frequency
-kubectl replace --force -f manifests/door_increased.yaml
-sleep 10
-average_time_door_increase=$(get_average_response $async_endpoint $num_executions)
+averageTimes=()
 
-# change seccon to have increased poll frequency
-kubectl replace --force -f manifests/seccon_increased.yaml
-sleep 10
-average_time_door_increase_and_seccon_increase=$(get_average_response $async_endpoint $num_executions)
+for pubInt in ${publishIntervals[@]}; do
+  for subInt in ${subscribeIntervals[@]}; do
+    # replace deployment values
+    kubectl get deployment door1-deployment -o json | jq --arg pInt "$pubInt" '.spec.template.spec.containers[0].args[1] = $pInt' | kubectl replace --force -f -
+    kubectl get deployment door2-deployment -o json | jq --arg pInt "$pubInt" '.spec.template.spec.containers[0].args[1] = $pInt' | kubectl replace --force -f -
+    kubectl get deployment seccon-deployment -o json | jq --arg sInt "$subInt" '.spec.template.spec.containers[0].args[1] = $sInt' | kubectl replace --force -f -
 
-# seccon still increased, door back to standard
-kubectl replace --force -f manifests/door.yaml
-sleep 10
-average_time_seccon_increase=$(get_average_response $async_endpoint $num_executions)
-
-echo $average_time_standard
-echo $average_time_door_increase
-echo $average_time_door_increase_and_seccon_increase
-echo $average_time_seccon_increase
+    # sleep while containers get replaced
+    sleep 10
+    average_time=$(get_average_response $async_endpoint $num_executions)
+    echo $average_time
+    averageTimes+=( $average_time )
+  done
+done
 
 timestamp=$(date +%d-%m-%Y_%H-%M-%S)
-filename=linechart_$timestamp.png
+filename=async_variable_response_$timestamp.png
 
-json_string=$(jq -n \
-                  --arg fn "$filename" \
-                  --arg standard "$average_time_standard" \
-                  --arg seccon_increase "$average_time_seccon_increase" \
-                  --arg door_increase "$average_time_door_increase" \
-                  --arg door_and_seccon_increase "$average_time_door_increase_and_seccon_increase"\
-                  --arg door_standard_line "Door publish interval: 10ms" \
-                  --arg door_increase_line "Door publish interval: 50ms" \
-                  '{filename: $fn, plottype: "line", x: ["2000", "10000"], "y":[$standard, $seccon_increase, $door_increase, $door_and_seccon_increase], "ylab":[$door_standard_line, $door_increase_line]}' )
+jsonSubInt=$(echo ${subscribeIntervals[@]} | jq -s '{x: .} ' )
+jsonPubInt=$(echo ${publishIntervals[@]} | jq -s '{ylab: .} ' )
+jsonTimes=$(echo ${averageTimes[@]} | jq -s '{y: .} ' )
 
-echo $json_string
+jsonString=$(jq -s '.[0] + .[1] + .[2]' <<EOF
+$jsonSubInt
+$jsonTimes
+$jsonPubInt
+EOF
+)
+
+finalJsonString=$(echo $jsonString | jq --arg fn $filename '. += {filename: $fn, plottype: "line"}')
+echo $finalJsonString
 
 curl -i \
       -H "Accept: application/json" \
       -H "Content-Type:application/json" \
-      -X POST --data "$json_string" $graph_function_endpoint
+      -X POST --data "$finalJsonString" $graph_function_endpoint
