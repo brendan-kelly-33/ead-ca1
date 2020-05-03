@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: door1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: door1
+  template:
+    metadata:
+      labels:
+        app: door1
+    spec:
+      containers:
+        - name: door1
+          args: ["1", "50", "redis-service:6379"]
+          image: eu.gcr.io/bk-eads-ca1/door:v1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: door2-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: door2
+  template:
+    metadata:
+      labels:
+        app: door2
+    spec:
+      containers:
+        - name: door2
+          args: ["2", "50", "redis-service:6379"]
+          image: eu.gcr.io/bk-eads-ca1/door:v1
