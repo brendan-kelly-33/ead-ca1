@@ -3,7 +3,7 @@ CA1
 Brendan Kelly
 X00159345
 
-This is the GitHub repository for my CA1 submission
+This is the GitHub repository for my CA1 submission.
 
 
 # Part 1
@@ -22,7 +22,7 @@ These URLs are subject to change, but I don't anticipate that they will.
 
 # Part 2
 
-Part 2 is a fully automated response time measurement system, using bash scripts.
+Part 2 is a fully automated response & recovery time measurement system, using bash scripts.
 
 ## 1. Response Times
 
@@ -72,4 +72,4 @@ To run all scripts as one execution, from within the reporting directory:
 Where NUMBER_OF_RUNS is the number of times you would like to measure the recovery/response time of each deployment/application.
 
 ## Reporting
-Reports are saved to the reports/ directory.
+Reports are saved to the reporting/reports/ directory.
