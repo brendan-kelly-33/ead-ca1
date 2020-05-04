@@ -5,6 +5,8 @@
 # Between runs, publish and subscribe intervals are changed in order to modify how the application behaves.
 # PARAM $1 number of runs to execute
 
+echo "Beginning asynchronous variable response times times test"
+
 # Exit if number of runs not provided
 if [ $# -eq 0 ]; then
   echo "Number of runs not provided"
@@ -84,3 +86,25 @@ curl -i \
       -H "Accept: application/json" \
       -H "Content-Type:application/json" \
       -X POST --data "$finalJsonString" $graph_function_endpoint
+
+# Create report
+{
+  echo "<!doctype html><html>"
+  echo "<head><title>Average response times for asynchronous application where subscribe and publish intervals are modified</title>"
+  echo "<style>table, th, td { padding: 10px; border: 1px solid black; border-collapse: collapse;}</style></head>"
+  echo "<body><h1>Average response times for asynchronous application where subscribe and publish intervals are modified</h1>"
+  echo "<h3>Number of runs: $1</h3>"
+  echo "<table><tbody><tr><th>Publish Interval</th><th>Subscribe Interval</th><th>Average Response Time</th></tr>"
+
+  i=0
+  for j in "${!publishIntervals[@]}"; do
+    for k in "${!subscribeIntervals[@]}"; do
+      echo "<tr><td>${publishIntervals[$j]}</td><td>${subscribeIntervals[$k]}</td><td>${averageTimes[$i]} s</td></tr>"
+      i=$((i+1))
+    done
+  done
+
+  echo "</tbody></table>"
+  echo "<img src='https://storage.cloud.google.com/bk-eads-ca-bucket/$filename'/>"
+  echo "</body></html>"
+} >> reports/async_variable_response_$timestamp.html

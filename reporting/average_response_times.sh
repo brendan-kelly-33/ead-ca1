@@ -4,6 +4,8 @@
 # This script retrieves the average response times of both the asynchronous and synchronous applications for a given number of runs.
 # PARAM $1 number of runs to execute
 
+echo "Beginning average response times test"
+
 # Exit if number of runs not provided
 if [ $# -eq 0 ]; then
   echo "Number of runs not provided"
@@ -60,3 +62,18 @@ curl -i \
       -H "Accept: application/json" \
       -H "Content-Type:application/json" \
       -X POST --data "$json_string" $graph_function_endpoint
+
+# Create report
+{
+  echo "<!doctype html><html>"
+  echo "<head><title>Average response times for synchronous and asynchronous applications</title>"
+  echo "<style>table, th, td { padding: 10px; border: 1px solid black; border-collapse: collapse;}</style></head>"
+  echo "<body><h1>Average response times for synchronous and asynchronous applications</h1>"
+  echo "<h3>Number of runs: $1</h3>"
+  echo "<table><tbody><tr><th>Asynchronous</th><th>Synchronous</th></tr>"
+  echo "<tr><td>${async_average} s</td>"
+  echo "<td>${sync_average} s</td></tr>"
+  echo "</tbody></table>"
+  echo "<img src='https://storage.cloud.google.com/bk-eads-ca-bucket/$filename'/>"
+  echo "</body></html>"
+} >> reports/response_times_$timestamp.html

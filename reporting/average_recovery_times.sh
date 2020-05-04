@@ -5,6 +5,8 @@
 # Every deployment is tested by deleting a pod and testing the ready time of the replacement pod
 # PARAM $1 number of runs to execute
 
+echo "Beginning average recovery times test"
+
 # Exit if number of runs not provided
 if [ $# -eq 0 ]; then
   echo "Number of runs not provided"
@@ -72,3 +74,21 @@ curl -i \
       -H "Accept: application/json" \
       -H "Content-Type:application/json" \
       -X POST --data "$finalJsonString" $graph_function_endpoint
+
+# Create report
+{
+  echo "<!doctype html><html>"
+  echo "<head><title>Average recovery times for synchronous and asynchronous applications</title>"
+  echo "<style>table, th, td { padding: 10px; border: 1px solid black; border-collapse: collapse;}</style></head>"
+  echo "<body><h1>Average recovery times for synchronous and asynchronous applications</h1>"
+  echo "<h3>Number of runs: $1</h3>"
+  echo "<table><tbody><tr><th>Deployment</th><th>Recovery time</th></tr>"
+
+  for i in "${!deployments[@]}"; do
+    echo "<tr><td>${deployments[$i]}</td><td>${average_recovery_times[$i]} s</td></tr>"
+  done
+
+  echo "</tbody></table>"
+  echo "<img src='https://storage.cloud.google.com/bk-eads-ca-bucket/$filename'/>"
+  echo "</body></html>"
+} >> reports/recovery_times_$timestamp.html
