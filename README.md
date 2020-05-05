@@ -12,10 +12,10 @@ The async and sync directories contain code, Dockerfiles, and kubernetes manifes
 
 The applications are hosted in Google Kubernetes Engine.
 
-Asynchronous: 
+Synchronous: 
 [http://34.68.240.121:31080/](http://34.68.240.121:31080/)
 
-Synchronous: 
+Asynchronous: 
 [http://34.68.240.121:31081/](http://34.68.240.121:31081/)
 
 These URLs are subject to change, but I don't anticipate that they will.
